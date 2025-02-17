@@ -1,0 +1,111 @@
+{
+    "name": "dusome-pygame",
+    "displayName": "Dusome PyGame",
+    "description": "A VS Code extension to generate a PyGame setup for Mr. Dusome's class.",
+    "version": "1.0.1",
+    "publisher": "Dusome",
+    "engines": {
+        "vscode": "^1.50.0"
+    },
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.showPygameMenu",
+                "title": "PyGame: Show Menu"
+            },
+            {
+                "command": "extension.createPyGameProject",
+                "title": "PyGame: Create Project"
+            },
+            {
+                "command": "extension.addPyGameButtonSupport",
+                "title": "PyGame: Add Button Object From The Web"
+            },
+            {
+                "command": "extension.addPyGameTextInputSupport",
+                "title": "PyGame: Add Text Input Object From The Webb"
+            },
+            {
+                "command": "extension.addPyGameGridSupport",
+                "title": "PyGame: Add Grid Object From The Web"
+            },
+            {
+                "command": "extension.addPyGameImageSupport",
+                "title": "PyGame: Add Image Object From The Web"
+            },
+            {
+                "command": "extension.addPyGameDBSupport",
+                "title": "PyGame: Add DB Objects From the Web"
+            },
+            {
+                "command": "extension.disposablePyGameCheck",
+                "title": "Add CheckBox and Radio Buttons From the Web"
+            },
+            {
+                "command": "extension.disposablePyGameText",
+                "title": "PyGame: Add Text file from Web"
+            },
+            {
+                "command": "extension.disposablePyGameRun",
+                "title": "PyGame: Run Program"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "extension.createPyGameProject",
+                    "when": "explorerResourceIsFolder",
+                    "group": "navigation"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "extension.showPygameMenu",
+                    "group": "navigation",
+                    "title": "$(list-selection) PyGame Actions",
+                    "tooltip": "Open PyGame Actions Menu"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "extension.disposablePyGameRun",
+                    "category": "python",
+                    "title": "PyGame: Run Program",
+                    "group": "navigation"
+                },
+                {
+                    "command": "extension.showPygameMenu",
+                    "when": "resourceLangId == python",
+                    "group": "navigation",
+                    "title": "PyGame Actions"
+                }
+            ]
+        }
+    },
+    "files": [
+        "extension.js"
+    ],
+    "scripts": {
+        "package": "vsce package",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Mathew-D/vs_code_pygame"
+    },
+    "keywords": [
+        "vscode",
+        "extension",
+        "python",
+        "pygame"
+    ],
+    "author": "Mathew Dusome",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^22.5.4"
+    }
+}
