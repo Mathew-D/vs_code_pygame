@@ -2,7 +2,7 @@
     "name": "dusome-pygame",
     "displayName": "Dusome PyGame",
     "description": "A VS Code extension to generate a PyGame setup for Mr. Dusome's class.",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "publisher": "Dusome",
     "engines": {
         "vscode": "^1.50.0"
@@ -15,7 +15,8 @@
         "commands": [
             {
                 "command": "extension.showPygameMenu",
-                "title": "PyGame: Show Menu"
+                "title": "PyGame: Show Menu",
+                "icon": "$(game)"
             },
             {
                 "command": "extension.createPyGameProject",
@@ -27,7 +28,7 @@
             },
             {
                 "command": "extension.addPyGameTextInputSupport",
-                "title": "PyGame: Add Text Input Object From The Webb"
+                "title": "PyGame: Add Text Input Object From The Web"
             },
             {
                 "command": "extension.addPyGameGridSupport",
@@ -44,6 +45,10 @@
             {
                 "command": "extension.disposablePyGameCheck",
                 "title": "Add CheckBox and Radio Buttons From the Web"
+            },
+            {
+                "command": "extension.disposablePyGameListwidget",
+                "title": "PyGame: Add List Widget and Combobox From the Web"
             },
             {
                 "command": "extension.disposablePyGameText",
@@ -66,7 +71,7 @@
                 {
                     "command": "extension.showPygameMenu",
                     "group": "navigation",
-                    "title": "$(list-selection) PyGame Actions",
+                    "title": "$(game) PyGame Actions",
                     "tooltip": "Open PyGame Actions Menu"
                 }
             ],

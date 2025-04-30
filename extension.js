@@ -5,15 +5,6 @@ const { exec } = require('child_process'); // ✅ Import exec
 const https = require('https');
 
 function activate(context) {
-    // Create Status Bar item
-    const pygameStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 250);
-   // rustStatusBarItem.text = "PyGame: Menu"; // Label on the Status Bar
-   // rustStatusBarItem.command = "extension.showPygameMenu"; // Command triggered when clicked
-  //  rustStatusBarItem.show(); // Display the button in the Status Bar
-   
-
-    // Add it to context so it's disposed properly
-    //  context.subscriptions.push(rustStatusBarItem);
 
     // Register the "Show PyGame Menu" command
     let disposableShowPygameMenu = vscode.commands.registerCommand('extension.showPygameMenu', async () => {
@@ -25,6 +16,7 @@ function activate(context) {
             { label: 'Add Text Input Object From The Web', command: 'extension.addPyGameTextInputSupport' },
             { label: 'Add DB Objects From the Web', command: 'extension.addPyGameDBSupport' },
             { label: 'Add CheckBox and Radio Buttons From the Web', command: 'extension.disposablePyGameCheck' },
+            { label: 'Add List Widget and Combobox From the Web', command: 'extension.disposablePyGameListwidget' },
             { label: 'Add Text file from Web', command: 'extension.disposablePyGameText' },
         ];
         const selected = await vscode.window.showQuickPick(options, { placeHolder: 'Choose an option' });
@@ -95,22 +87,33 @@ while True:
 
 let disposablePyButtons = vscode.commands.registerCommand('extension.addPyGameButtonSupport', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/buttons.py';
-
     await downloadToFolder('objects', 'buttons.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Button Object in: ${folderPath}`);
+});
+
+let disposablePyGameListwidget = vscode.commands.registerCommand('extension.disposablePyGameListwidget', async () => {
+    const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/list_widget.py';
+    await downloadToFolder('objects', 'list_widget.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
+    vscode.window.showInformationMessage(`List Widget and Commbobox Object in: ${folderPath}`);
 });
 
 let disposablePyGrid = vscode.commands.registerCommand('extension.addPyGameGridSupport', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/grid.py';
-
     await downloadToFolder('objects', 'grid.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Grid Object in: ${folderPath}`);
 });
 
 let disposablePyImg = vscode.commands.registerCommand('extension.addPyGameImageSupport', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/image.py';
-
     await downloadToFolder('objects', 'image.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Image Object in: ${folderPath}`);
 });
 
@@ -137,28 +140,36 @@ let disposablePyGameRun = vscode.commands.registerCommand('extension.disposableP
 
 let disposablePyTextInput = vscode.commands.registerCommand('extension.addPyGameTextInputSupport', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/text.py';
-
     await downloadToFolder('objects', 'text.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Text Input Object in: ${folderPath}`);
 });
+
 let disposableaddPyGameDB = vscode.commands.registerCommand('extension.addPyGameDBSupport', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/database.py';
-
     await downloadToFolder('objects', 'database.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Database Object in: ${folderPath}`);
 });
+
 let disposablePyGameCheck = vscode.commands.registerCommand('extension.disposablePyGameCheck', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/checkbox.py';
-
     await downloadToFolder('objects', 'checkbox.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding CheckBox Object in: ${folderPath}`);
 });
+
 let disposablePyGameText = vscode.commands.registerCommand('extension.disposablePyGameText', async () => {
     const url = 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/text_files.py';
-
     await downloadToFolder('objects', 'text_files.py', url);
+    // Get folder path for message
+    const folderPath = await getFolderPath();
     vscode.window.showInformationMessage(`Adding Text File Object in: ${folderPath}`);
 });
+
 // Add commands to the context subscriptions
 context.subscriptions.push(
     disposableShowPygameMenu,
@@ -170,6 +181,7 @@ context.subscriptions.push(
     disposableaddPyGameDB,
     disposablePyGameRun,
     disposablePyGameCheck,
+    disposablePyGameListwidget,
     disposablePyGameText
 );
 }
