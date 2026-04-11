@@ -23,40 +23,16 @@
                 "title": "PyGame: Create Project"
             },
             {
-                "command": "extension.addPyGameButtonSupport",
-                "title": "PyGame: Add Button Object From The Web"
-            },
-            {
-                "command": "extension.addPyGameTextInputSupport",
-                "title": "PyGame: Add Text Input Object From The Web"
-            },
-            {
-                "command": "extension.addPyGameGridSupport",
-                "title": "PyGame: Add Grid Object From The Web"
-            },
-            {
-                "command": "extension.addPyGameImageSupport",
-                "title": "PyGame: Add Image Object From The Web"
-            },
-            {
-                "command": "extension.addPyGameDBSupport",
-                "title": "PyGame: Add DB Objects From the Web"
-            },
-            {
-                "command": "extension.disposablePyGameCheck",
-                "title": "Add CheckBox and Radio Buttons From the Web"
-            },
-            {
-                "command": "extension.disposablePyGameListwidget",
-                "title": "PyGame: Add List Widget and Combobox From the Web"
-            },
-            {
-                "command": "extension.disposablePyGameText",
-                "title": "PyGame: Add Text file from Web"
-            },
-            {
                 "command": "extension.disposablePyGameRun",
                 "title": "PyGame: Run Program"
+            },
+            {
+                "command": "extension.addConfiguredPyGameModule",
+                "title": "PyGame: Add Configured Module From The Web"
+            },
+            {
+                "command": "extension.manageSettings",
+                "title": "PyGame: Manage Settings"
             }
         ],
         "menus": {
@@ -134,12 +110,84 @@
                     "default": false,
                     "description": "Automatically open downloaded files in the editor.",
                     "scope": "application"
+                },
+                "pygameObjects.downloadItems": {
+                    "type": "array",
+                    "default": [
+                        {
+                            "fileName": "buttons.py",
+                            "menuLabel": "Add Button Object From The Web",
+                            "successMessage": "Adding Button Object"
+                        },
+                        {
+                            "fileName": "list_widget.py",
+                            "menuLabel": "Add List Widget and Combobox From The Web",
+                            "successMessage": "Adding List Widget and Combobox"
+                        },
+                        {
+                            "fileName": "grid.py",
+                            "menuLabel": "Add Grid Object From The Web",
+                            "successMessage": "Adding Grid Object"
+                        },
+                        {
+                            "fileName": "image.py",
+                            "menuLabel": "Add Image Object From The Web",
+                            "successMessage": "Adding Image Object"
+                        },
+                        {
+                            "fileName": "text.py",
+                            "menuLabel": "Add Text Input Object From The Web",
+                            "successMessage": "Adding Text Input Object"
+                        },
+                        {
+                            "fileName": "database.py",
+                            "menuLabel": "Add DB Objects From The Web",
+                            "successMessage": "Adding Database Object"
+                        },
+                        {
+                            "fileName": "checkbox.py",
+                            "menuLabel": "Add CheckBox and Radio Buttons From The Web",
+                            "successMessage": "Adding CheckBox Object"
+                        },
+                        {
+                            "fileName": "text_files.py",
+                            "menuLabel": "Add Text File From The Web",
+                            "successMessage": "Adding Text File Object"
+                        }
+                    ],
+                    "description": "Download entries shown in PyGame: Show Menu. Each entry can optionally provide a url to override pygameObjects.baseUrl + fileName.",
+                    "scope": "application",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "fileName"
+                        ],
+                        "properties": {
+                            "fileName": {
+                                "type": "string",
+                                "description": "File name to download, e.g. buttons.py"
+                            },
+                            "url": {
+                                "type": "string",
+                                "description": "Optional full http/https URL. When set, overrides pygameObjects.baseUrl + fileName."
+                            },
+                            "menuLabel": {
+                                "type": "string",
+                                "description": "Label shown in the PyGame menu for this entry."
+                            },
+                            "successMessage": {
+                                "type": "string",
+                                "description": "Message shown after a successful download."
+                            }
+                        }
+                    }
                 }
             }
         }
     },
     "files": [
-        "extension.js"
+        "extension.js",
+        "src/"
     ],
     "scripts": {
         "package": "vsce package",

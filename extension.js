@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process'); // ✅ Import exec
 const https = require('https');
+const http = require('http');
+const webSettings = require('./src/webSettings');
 
 // Function to get the base URL from settings
 function getBaseUrl() {
@@ -49,25 +51,24 @@ function shouldAutoOpenFiles() {
     return config.get('autoOpenDownloadedFiles') || false;
 }
 
+function normalizeDownloadItem(entry) { return webSettings.normalizeDownloadItem(entry); }
+function getDownloadItems() { return webSettings.getDownloadItems(); }
+function resolveDownloadItemUrl(item) { return webSettings.resolveDownloadItemUrl(item, getBaseUrl()); }
+function buildMenuOptions() { return webSettings.buildMenuOptions(); }
+
 function activate(context) {
 
     // Register the "Show PyGame Menu" command
     let disposableShowPygameMenu = vscode.commands.registerCommand('extension.showPygameMenu', async () => {
         const options = [
             { label: 'Run Program', command: 'extension.disposablePyGameRun' },
-            { label: 'Add Grid Object From The Web', command: 'extension.addPyGameGridSupport' },
-            { label: 'Add Image Object From The Web', command: 'extension.addPyGameImageSupport' },
-            { label: 'Add Button Object From The Web', command: 'extension.addPyGameButtonSupport' },
-            { label: 'Add Text Input Object From The Web', command: 'extension.addPyGameTextInputSupport' },
-            { label: 'Add DB Objects From the Web', command: 'extension.addPyGameDBSupport' },
-            { label: 'Add CheckBox and Radio Buttons From the Web', command: 'extension.disposablePyGameCheck' },
-            { label: 'Add List Widget and Combobox From the Web', command: 'extension.disposablePyGameListwidget' },
-            { label: 'Add Text file from Web', command: 'extension.disposablePyGameText' },
+            ...buildMenuOptions(),
+            { label: '⚙️ Plugin Settings', command: 'extension.manageSettings' },
         ];
         const selected = await vscode.window.showQuickPick(options, { placeHolder: 'Choose an option' });
 
         if (selected) {
-            vscode.commands.executeCommand(selected.command);
+            vscode.commands.executeCommand(selected.command, ...(selected.args || []));
         }
         //     context.subscriptions.push(disposableShowMenu);
     });
@@ -141,39 +142,6 @@ while True:
 });
 
 
-let disposablePyButtons = vscode.commands.registerCommand('extension.addPyGameButtonSupport', async () => {
-    const url = getBaseUrl() + 'buttons.py';
-    await downloadToFolder(getObjectsFolder(), 'buttons.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Button Object in: ${folderPath}`);
-});
-
-let disposablePyGameListwidget = vscode.commands.registerCommand('extension.disposablePyGameListwidget', async () => {
-    const url = getBaseUrl() + 'list_widget.py';
-    await downloadToFolder(getObjectsFolder(), 'list_widget.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`List Widget and Commbobox Object in: ${folderPath}`);
-});
-
-let disposablePyGrid = vscode.commands.registerCommand('extension.addPyGameGridSupport', async () => {
-    const url = getBaseUrl() + 'grid.py';
-    await downloadToFolder(getObjectsFolder(), 'grid.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Grid Object in: ${folderPath}`);
-});
-
-let disposablePyImg = vscode.commands.registerCommand('extension.addPyGameImageSupport', async () => {
-    const url = getBaseUrl() + 'image.py';
-    await downloadToFolder(getObjectsFolder(), 'image.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Image Object in: ${folderPath}`);
-});
-
-
 let disposablePyGameRun = vscode.commands.registerCommand('extension.disposablePyGameRun', async () => {
 
     const folderPath = await getFolderPath();
@@ -194,51 +162,104 @@ let disposablePyGameRun = vscode.commands.registerCommand('extension.disposableP
     vscode.window.showInformationMessage(`Running PyGame main.py.`);
 });
 
-let disposablePyTextInput = vscode.commands.registerCommand('extension.addPyGameTextInputSupport', async () => {
-    const url = getBaseUrl() + 'text.py';
-    await downloadToFolder(getObjectsFolder(), 'text.py', url);
-    // Get folder path for message
+let disposableAddConfiguredPyGameModule = vscode.commands.registerCommand('extension.addConfiguredPyGameModule', async (itemConfig) => {
+    let selected = normalizeDownloadItem(itemConfig);
+
+    if (!selected) {
+        const items = getDownloadItems();
+        if (items.length === 0) {
+            vscode.window.showWarningMessage('No download items configured. Update pygameObjects.downloadItems in Settings.');
+            return;
+        }
+        const picked = await vscode.window.showQuickPick(
+            items.map(item => ({ label: item.menuLabel, detail: item.fileName, item })),
+            { placeHolder: 'Choose a module to download' }
+        );
+        if (!picked) {
+            return;
+        }
+        selected = picked.item;
+    }
+
+    const url = resolveDownloadItemUrl(selected);
+    await downloadToFolder(getObjectsFolder(), selected.fileName, url);
     const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Text Input Object in: ${folderPath}`);
+    if (folderPath) {
+        vscode.window.showInformationMessage(`${selected.successMessage} in: ${folderPath}`);
+    }
 });
 
-let disposableaddPyGameDB = vscode.commands.registerCommand('extension.addPyGameDBSupport', async () => {
-    const url = getBaseUrl() + 'database.py';
-    await downloadToFolder(getObjectsFolder(), 'database.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Database Object in: ${folderPath}`);
-});
+    let disposableManageSettings = vscode.commands.registerCommand('extension.manageSettings', async () => {
+        const panel = vscode.window.createWebviewPanel(
+            'pygameSettings',
+            'PyGame Extension Settings',
+            vscode.ViewColumn.One,
+            { enableScripts: true }
+        );
 
-let disposablePyGameCheck = vscode.commands.registerCommand('extension.disposablePyGameCheck', async () => {
-    const url = getBaseUrl() + 'checkbox.py';
-    await downloadToFolder(getObjectsFolder(), 'checkbox.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding CheckBox Object in: ${folderPath}`);
-});
+        const config = vscode.workspace.getConfiguration('pygameObjects');
+        const items = webSettings.getDownloadItems();
+        const defaultItems = webSettings.getDefaultDownloadItems();
+        const settings = {
+            baseUrl: getBaseUrl(),
+            objectsFolder: getObjectsFolder(),
+            defaultFPS: getDefaultFPS(),
+            defaultWindowWidth: getDefaultWindowWidth(),
+            defaultWindowHeight: getDefaultWindowHeight(),
+            defaultAuthorName: config.get('defaultAuthorName') || '',
+            autoOpenDownloadedFiles: shouldAutoOpenFiles()
+        };
 
-let disposablePyGameText = vscode.commands.registerCommand('extension.disposablePyGameText', async () => {
-    const url = getBaseUrl() + 'text_files.py';
-    await downloadToFolder(getObjectsFolder(), 'text_files.py', url);
-    // Get folder path for message
-    const folderPath = await getFolderPath();
-    vscode.window.showInformationMessage(`Adding Text File Object in: ${folderPath}`);
-});
+        panel.webview.html = webSettings.getWebSettingsContent(items, defaultItems, settings);
+
+        panel.webview.onDidReceiveMessage(async (message) => {
+            try {
+                if (message.command === 'save') {
+                    await config.update('baseUrl', message.settings.baseUrl, vscode.ConfigurationTarget.Global);
+                    await config.update('objectsFolder', message.settings.objectsFolder, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultFPS', message.settings.defaultFPS, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultWindowWidth', message.settings.defaultWindowWidth, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultWindowHeight', message.settings.defaultWindowHeight, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultAuthorName', message.settings.defaultAuthorName, vscode.ConfigurationTarget.Global);
+                    await config.update('autoOpenDownloadedFiles', message.settings.autoOpenDownloadedFiles, vscode.ConfigurationTarget.Global);
+                    await config.update('downloadItems', message.items, vscode.ConfigurationTarget.Global);
+                    vscode.window.showInformationMessage('PyGame settings updated successfully!');
+                    panel.dispose();
+                } else if (message.command === 'cancel') {
+                    panel.dispose();
+                } else if (message.command === 'reset') {
+                    await config.update('baseUrl', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('baseUrl', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('objectsFolder', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('objectsFolder', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('defaultFPS', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultFPS', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('defaultWindowWidth', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultWindowWidth', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('defaultWindowHeight', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultWindowHeight', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('defaultAuthorName', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('defaultAuthorName', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('autoOpenDownloadedFiles', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('autoOpenDownloadedFiles', undefined, vscode.ConfigurationTarget.Workspace);
+                    await config.update('downloadItems', undefined, vscode.ConfigurationTarget.Global);
+                    await config.update('downloadItems', undefined, vscode.ConfigurationTarget.Workspace);
+                    vscode.window.showInformationMessage('PyGame settings reset to defaults!');
+                    panel.dispose();
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`Error updating settings: ${error.message}`);
+            }
+        });
+    });
 
 // Add commands to the context subscriptions
 context.subscriptions.push(
     disposableShowPygameMenu,
     disposableCreatePyGame,
-    disposablePyButtons,
-    disposablePyGrid,
-    disposablePyImg,
-    disposablePyTextInput,
-    disposableaddPyGameDB,
     disposablePyGameRun,
-    disposablePyGameCheck,
-    disposablePyGameListwidget,
-    disposablePyGameText
+    disposableAddConfiguredPyGameModule,
+    disposableManageSettings
 );
 }
 
@@ -261,7 +282,8 @@ async function getFolderPath() {
 }
 
 function downloadFile(url, targetPath, autoOpen = false) {
-    https.get(url, (response) => {
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (response) => {
         if (response.statusCode !== 200) {
             vscode.window.showErrorMessage(`Failed to download ${path.basename(targetPath)}: ${response.statusCode}`);
             return;
