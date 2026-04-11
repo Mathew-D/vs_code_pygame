@@ -2,7 +2,7 @@
     "name": "dusome-pygame",
     "displayName": "Dusome PyGame",
     "description": "A VS Code extension to generate a PyGame setup for Mr. Dusome's class.",
-    "version": "1.0.3",
+    "version": "2.0.0",
     "publisher": "Dusome",
     "engines": {
         "vscode": "^1.50.0"
@@ -89,6 +89,53 @@
                     "title": "PyGame Actions"
                 }
             ]
+        },
+        "configuration": {
+            "title": "PyGame Objects",
+            "properties": {
+                "pygameObjects.baseUrl": {
+                    "type": "string",
+                    "default": "https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/",
+                    "description": "Base URL for downloading pygame objects. Must end with a forward slash.",
+                    "scope": "application"
+                },
+                "pygameObjects.objectsFolder": {
+                    "type": "string",
+                    "default": "objects",
+                    "description": "Folder name where downloaded objects will be saved.",
+                    "scope": "application"
+                },
+                "pygameObjects.defaultFPS": {
+                    "type": "number",
+                    "default": 60,
+                    "description": "Default FPS for new PyGame projects.",
+                    "scope": "application"
+                },
+                "pygameObjects.defaultWindowWidth": {
+                    "type": "number",
+                    "default": 500,
+                    "description": "Default window width for new PyGame projects.",
+                    "scope": "application"
+                },
+                "pygameObjects.defaultWindowHeight": {
+                    "type": "number",
+                    "default": 500,
+                    "description": "Default window height for new PyGame projects.",
+                    "scope": "application"
+                },
+                "pygameObjects.defaultAuthorName": {
+                    "type": "string",
+                    "default": "<Your Name Here>",
+                    "description": "Default author name for new PyGame projects. Leave empty to use 'Your Name Here'.",
+                    "scope": "application"
+                },
+                "pygameObjects.autoOpenDownloadedFiles": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically open downloaded files in the editor.",
+                    "scope": "application"
+                }
+            }
         }
     },
     "files": [
