@@ -56,6 +56,53 @@ function getDownloadItems() { return webSettings.getDownloadItems(); }
 function resolveDownloadItemUrl(item) { return webSettings.resolveDownloadItemUrl(item, getBaseUrl()); }
 function buildMenuOptions() { return webSettings.buildMenuOptions(); }
 
+function getCurrentSettings() {
+    const config = vscode.workspace.getConfiguration('pygameObjects');
+    return {
+        baseUrl: getBaseUrl(),
+        objectsFolder: getObjectsFolder(),
+        defaultFPS: getDefaultFPS(),
+        defaultWindowWidth: getDefaultWindowWidth(),
+        defaultWindowHeight: getDefaultWindowHeight(),
+        defaultAuthorName: config.get('defaultAuthorName') || '',
+        autoOpenDownloadedFiles: shouldAutoOpenFiles()
+    };
+}
+
+function renderSettingsPanel(panel, settings, items, defaultItems) {
+    panel.webview.html = webSettings.getWebSettingsContent(items, defaultItems, settings);
+}
+
+async function resetConfigurationSetting(config, key) {
+    const inspected = config.inspect(key);
+    if (!inspected) {
+        return;
+    }
+
+    const resetOperations = [];
+
+    if (inspected.globalValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.Global));
+    }
+    if (inspected.workspaceValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.Workspace));
+    }
+    if (inspected.workspaceFolderValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.WorkspaceFolder));
+    }
+    if (inspected.globalLanguageValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.Global, true));
+    }
+    if (inspected.workspaceLanguageValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.Workspace, true));
+    }
+    if (inspected.workspaceFolderLanguageValue !== undefined) {
+        resetOperations.push(config.update(key, undefined, vscode.ConfigurationTarget.WorkspaceFolder, true));
+    }
+
+    await Promise.all(resetOperations);
+}
+
 function activate(context) {
 
     // Register the "Show PyGame Menu" command
@@ -200,17 +247,9 @@ let disposableAddConfiguredPyGameModule = vscode.commands.registerCommand('exten
         const config = vscode.workspace.getConfiguration('pygameObjects');
         const items = webSettings.getDownloadItems();
         const defaultItems = webSettings.getDefaultDownloadItems();
-        const settings = {
-            baseUrl: getBaseUrl(),
-            objectsFolder: getObjectsFolder(),
-            defaultFPS: getDefaultFPS(),
-            defaultWindowWidth: getDefaultWindowWidth(),
-            defaultWindowHeight: getDefaultWindowHeight(),
-            defaultAuthorName: config.get('defaultAuthorName') || '',
-            autoOpenDownloadedFiles: shouldAutoOpenFiles()
-        };
+        const settings = getCurrentSettings();
 
-        panel.webview.html = webSettings.getWebSettingsContent(items, defaultItems, settings);
+        renderSettingsPanel(panel, settings, items, defaultItems);
 
         panel.webview.onDidReceiveMessage(async (message) => {
             try {
@@ -228,24 +267,26 @@ let disposableAddConfiguredPyGameModule = vscode.commands.registerCommand('exten
                 } else if (message.command === 'cancel') {
                     panel.dispose();
                 } else if (message.command === 'reset') {
-                    await config.update('baseUrl', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('baseUrl', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('objectsFolder', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('objectsFolder', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('defaultFPS', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('defaultFPS', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('defaultWindowWidth', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('defaultWindowWidth', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('defaultWindowHeight', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('defaultWindowHeight', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('defaultAuthorName', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('defaultAuthorName', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('autoOpenDownloadedFiles', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('autoOpenDownloadedFiles', undefined, vscode.ConfigurationTarget.Workspace);
-                    await config.update('downloadItems', undefined, vscode.ConfigurationTarget.Global);
-                    await config.update('downloadItems', undefined, vscode.ConfigurationTarget.Workspace);
-                    vscode.window.showInformationMessage('PyGame settings reset to defaults!');
-                    panel.dispose();
+                    const settingKeys = [
+                        'baseUrl',
+                        'objectsFolder',
+                        'defaultFPS',
+                        'defaultWindowWidth',
+                        'defaultWindowHeight',
+                        'defaultAuthorName',
+                        'autoOpenDownloadedFiles',
+                        'downloadItems'
+                    ];
+
+                    await Promise.all(settingKeys.map(key => resetConfigurationSetting(config, key)));
+
+                    renderSettingsPanel(
+                        panel,
+                        webSettings.getDefaultSettings(),
+                        webSettings.getDefaultDownloadItems(),
+                        webSettings.getDefaultDownloadItems()
+                    );
+                    vscode.window.showInformationMessage('PyGame settings reset to defaults.');
                 }
             } catch (error) {
                 vscode.window.showErrorMessage(`Error updating settings: ${error.message}`);

@@ -35,6 +35,24 @@ function getDefaultDownloadItems() {
     return inspected && inspected.defaultValue ? inspected.defaultValue : [];
 }
 
+function getDefaultSettings() {
+    const config = getExtensionConfig();
+    const getDefaultValue = (key, fallback) => {
+        const inspected = config.inspect(key);
+        return inspected && inspected.defaultValue !== undefined ? inspected.defaultValue : fallback;
+    };
+
+    return {
+        baseUrl: getDefaultValue('baseUrl', 'https://raw.githubusercontent.com/Mathew-D/pygame-objects/main/'),
+        objectsFolder: getDefaultValue('objectsFolder', 'objects'),
+        defaultFPS: getDefaultValue('defaultFPS', 60),
+        defaultWindowWidth: getDefaultValue('defaultWindowWidth', 500),
+        defaultWindowHeight: getDefaultValue('defaultWindowHeight', 500),
+        defaultAuthorName: getDefaultValue('defaultAuthorName', ''),
+        autoOpenDownloadedFiles: getDefaultValue('autoOpenDownloadedFiles', false)
+    };
+}
+
 function getDownloadItems() {
     const raw = getExtensionConfig().get('downloadItems', []);
     if (!Array.isArray(raw)) {
@@ -550,6 +568,7 @@ function getWebSettingsContent(items, defaultItems, settings) {
 
 module.exports = {
     normalizeDownloadItem,
+    getDefaultSettings,
     getDefaultDownloadItems,
     getDownloadItems,
     resolveDownloadItemUrl,

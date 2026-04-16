@@ -2,7 +2,7 @@
     "name": "dusome-pygame",
     "displayName": "Dusome PyGame",
     "description": "A VS Code extension to generate a PyGame setup for Mr. Dusome's class.",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "publisher": "Dusome",
     "engines": {
         "vscode": "^1.50.0"
