@@ -135,6 +135,11 @@
                             "successMessage": "Adding Image Object"
                         },
                         {
+                            "fileName": "label.py",
+                            "menuLabel": "Add Label Object From The Web",
+                            "successMessage": "Adding Label Object"
+                        },
+                        {
                             "fileName": "text.py",
                             "menuLabel": "Add Text Input Object From The Web",
                             "successMessage": "Adding Text Input Object"
